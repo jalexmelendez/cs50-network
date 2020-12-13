@@ -1,0 +1,35 @@
+{% extends "network/profile.html" %}
+{% block post_editor %}
+
+<div class="">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit your post.</h5>
+          <button onclick="cancel_edit()" type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!--Form-->
+          <form id="post_form" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="exampleFormControlInput1">Image URL</label>
+              <input name="image_url" id="image_url" type="email" class="form-control" id="exampleFormControlInput1" placeholder="Image Link" value="{{post.image_url}}">
+            </div>
+            <div class="form-group">
+              <label for="exampleFormControlTextarea1">post content</label>
+              <textarea name="post_body" id="post_body" class="form-control" id="exampleFormControlTextarea1" rows="3">{{post.body}}</textarea>
+            </div>
+          </form>
+          <!--End of Form-->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="cancel_edit()">Close</button>
+          <button onclick="submitPostData()" type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

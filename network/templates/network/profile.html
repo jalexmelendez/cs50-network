@@ -1,0 +1,110 @@
+{% extends "network/app_nav.html" %}
+{% block body %}
+<div class="w3-container">
+    <h1><b>{{user}}'s profile</b></h1>
+    <p id="current_user_tag" style="display: none;">{{request.user.username}}</p>
+    <p id="user_tag" style="display:none;">{{user}}</p>
+    <div class="w3-section w3-bottombar w3-padding-16">
+      <span class="w3-margin-right">Filter:</span> 
+      <button onclick="render_user_posts()" class="w3-button w3-black">User Posts</button>
+      <button onclick="render_following_posts()" class="w3-button w3-white">Following:<span data='{{following}}' id="follow_c" class="badge bg-light">0</span></button>
+      <!--<button class="w3-button w3-white w3-hide-small"><i class="fa fa-map-pin w3-margin-right"></i>Followed</button>-->
+    </div>
+</div>
+    {% if user == request.user.username %}
+
+    {% block post_editor %}
+    {% endblock %}
+    
+    {% else %}
+    <div class="card" style="margin: 25px;">
+      <div class="card-header">
+        User information
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">Follow {{user}}</h5>
+        <p class="card-text">Follow this user to start recieving posts on your following section within your profile.</p>
+        <a id="followbtn" onclick="followUser('{{user}}', '{{request.user.username}}')" type="button" class="btn btn-outline-primary">Follow</a>
+      </div>
+    </div>
+    {% endif %}
+    <div id="post_feed">
+
+    </div>
+    <!--Navigation-->
+    <div id="post_pagination">
+      <nav aria-label="...">
+          <ul class="pagination">
+            <li class="page-item">
+              <button id="previous_btn" onclick="previous()" type="button" class="btn btn-light disabled">previous</button>
+            </li>
+            <li class="page-item active" aria-current="page">
+              <span id="page_counter" class="page-link">
+                1
+                <span class="sr-only">(current)</span>
+              </span>
+            </li>
+            <li class="page-item">
+              <button id="next_btn" onclick="next()" type="button" class="btn btn-light">Next</button>
+            </li>
+          </ul>
+      </nav>
+    </div>
+
+    {% load static %}
+    <script src="{% static 'network/js_react_profile.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js" integrity="sha512-pBSlhNUvB+td6sjW1zmR6L7c7kVWR4octUPl4tfHmzO63424nxta8aLmficEcAAswQmRqTiToi63AazDurj/Sg==" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <script type="text/babel">
+    let post_info = [];
+    function save_data(data) {
+      post_info.push(data);
+    }
+    function render_element() {
+            let list_posts = post_info.map((data) =>
+            <div key={data.id.toString()} class="card mb-3" id={data.id}>
+                <img key={data.image_url.toString()} src={data.image_url} class="card-img-top"></img>
+                <div class="card-body">
+                    <a key={data.user.toString() + "profile"} href={'/profile/'+ data.user }><h5 key={data.user.toString()} class="card-title">{data.user}</h5></a>
+                    <p key={data.body.toString()} class="card-text">{data.body}</p>
+                    <p class="card-text"><small key={data.date.toString()} class="text-muted">Last updated {data.date}</small></p>
+                </div>
+                <div class="card-body usr_interaction">
+                    {data.like_count == null 
+                        ? <button onClick={() => new_like('{{request.user.username}}', data['id'])} type="button" class="btn btn-outline-success like_btn" data-likes="None">Like <span class="badge badge-light">0</span></button> 
+                        : <button onClick={() => like('{{request.user.username}}', data['id'])} key={data.like_count.toString()} type="button" class="btn btn-outline-success like_btn" data-likes={data.like_count.split(',')}>Like <span key={data.like_count.toString()} class="badge badge-light">{data.like_count.split(',').length}</span></button>
+                    }
+                    {data.user == '{{request.user.username}}'
+                    ? <button onClick={() => window.location.href=`/edit/${data['id']}`} type="button" class="btn btn-outline-primary">Edit post</button>
+                    : <span></span>
+                    }
+                </div>
+            </div>
+            );
+            const post_target = document.getElementById('post_feed');
+            ReactDOM.render(list_posts, post_target);
+        }
+  function unmountNode() {
+    ReactDOM.unmountComponentAtNode(document.getElementById('post_feed').childNodes);
+  }
+    
+    </script>
+    <script>
+    let following_data = document.getElementById('follow_c').getAttribute('data');
+    const followbtn = document.getElementById('followbtn');
+    document.getElementById('follow_c').innerHTML = following_data.split(',').length;
+    const current_usr = "{{request.user.username}}";
+    let currentUsrIsFollowing = "{{followers}}";
+    if (currentUsrIsFollowing.split(',').includes(user)) {
+      followbtn.setAttribute('class', 'btn btn-primary');
+      followbtn.setAttribute('followed', 'true');
+      followbtn.innerText = 'Followed';
+    }
+    else {
+      followbtn.setAttribute('followed', 'false');
+    }
+    function cancel_edit() {
+      window.location.href = '/profile'
+    }
+    </script>
+{% endblock %}

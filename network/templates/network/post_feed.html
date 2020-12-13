@@ -1,0 +1,96 @@
+{% extends "network/app_nav.html" %}
+{% block body %}
+{% load static %}
+<div class="w3-container">
+    <script src="{% static 'network/js_react.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js" integrity="sha512-pBSlhNUvB+td6sjW1zmR6L7c7kVWR4octUPl4tfHmzO63424nxta8aLmficEcAAswQmRqTiToi63AazDurj/Sg==" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    
+    <div id="post_manager" class="jumbotron">
+        <div id="welcome_msj">
+        <h1 id="user_in_session" class="display-4">{{request.user.username}}</h1>
+        <p class="lead">You can write a post clicking this button.</p>
+        <a onclick="display_editor()" role="button">
+            <button type="button" class="btn btn-primary">Create new post.</button>
+        </a>
+        </div>
+        <form id="create_post" method="POST" style="display: none;">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="exampleFormControlInput1">Add your image URl</label>
+                <input name="image_url" class="form-control" id="exampleFormControlInput1" style="width: 100%;" placeholder="your image url goes here">
+              </div>
+            <div class="form-group">
+                <label for="exampleFormControlTextarea1">Write something.</label>
+                <textarea name="body" class="form-control" id="exampleFormControlTextarea1" rows="3" style="width: 100%;"></textarea>
+              </div>
+              <button onclick="hide_editor()" value="submit" type="submit" class="btn btn-primary">Publish post</button>
+        </form>
+        <script>
+            function display_editor() {
+                document.getElementById('create_post').style.display = 'block';
+                document.getElementById('welcome_msj').style.display = 'none';
+            }
+
+            function hide_editor() {
+                document.getElementById('create_post').style.display = 'none';
+                document.getElementById('welcome_msj').style.display = 'block';
+                render_content();
+            }
+        </script>
+        <style>
+            .dislike_btn {
+                display: none;
+            }
+        </style>
+    </div>
+
+    <div id="post_feed">
+        <h2>Posts right here.</h2>
+        <script type="text/babel">
+        let post_info = [];
+        function save_data(data) {
+            post_info.push(data);
+        }
+        function render_element() {
+            let list_posts = post_info.map((data) =>
+            <div key={data.id.toString()} class="card mb-3" id={data.id}>
+                <img key={data.image_url.toString()} src={data.image_url} class="card-img-top"></img>
+                <div class="card-body">
+                    <a key={data.user.toString() + "profile"} href={'/profile/'+ data.user }><h5 key={data.user.toString()} class="card-title">{data.user}</h5></a>
+                    <p key={data.body.toString()} class="card-text">{data.body}</p>
+                    <p class="card-text"><small key={data.date.toString()} class="text-muted">Last updated {data.date}</small></p>
+                </div>
+                <div class="card-body usr_interaction">
+                    {data.like_count == null 
+                        ? <button onClick={() => new_like('{{request.user.username}}', data['id'])} type="button" class="btn btn-outline-success like_btn" data-likes="None">Like <span class="badge badge-light">0</span></button> 
+                        : <button onClick={() => like('{{request.user.username}}', data['id'])} key={data.like_count.toString()} type="button" class="btn btn-outline-success like_btn" data-likes={data.like_count.split(',')}>Like <span key={data.like_count.toString()} class="badge badge-light">{data.like_count.split(',').length}</span></button>
+                    }
+                </div>
+            </div>
+            );
+            const post_target = document.getElementById('post_feed');
+            ReactDOM.render(list_posts, post_target);
+        }
+        </script>
+    </div>
+    <div id="post_pagination">
+        <nav aria-label="...">
+            <ul class="pagination">
+              <li class="page-item">
+                <button id="previous_btn" onclick="previous()" type="button" class="btn btn-light disabled">previous</button>
+              </li>
+              <li class="page-item active" aria-current="page">
+                <span id="page_counter" class="page-link">
+                  1
+                  <span class="sr-only">(current)</span>
+                </span>
+              </li>
+              <li class="page-item">
+                <button id="next_btn" onclick="next()" type="button" class="btn btn-light">Next</button>
+              </li>
+            </ul>
+          </nav>
+    </div>
+</div>
+{% endblock %}

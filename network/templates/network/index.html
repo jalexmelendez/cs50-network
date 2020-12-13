@@ -1,0 +1,34 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+{% load static %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js" integrity="sha512-pBSlhNUvB+td6sjW1zmR6L7c7kVWR4octUPl4tfHmzO63424nxta8aLmficEcAAswQmRqTiToi63AazDurj/Sg==" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+<body>
+    {% for posts in posts %}
+    
+    <div class="card mb-3">
+        <div class="row no-gutters">
+          <div class="col-md-4">
+            <img src="{{posts.image_url}}" class="card-img" alt="...">
+          </div>
+          <div class="col-md-8">
+            <div class="card-body">
+              <h5 class="card-title">{{posts.user}}</h5>
+              <p class="card-text">{{posts.body}}</p>
+              <p class="card-text"><small class="text-muted">{{posts.date}}</small></p>
+              <button type="button" class="btn btn-primary">
+                Likes <span id="{{posts.id}}" class="badge badge-light"></span>
+                <script>
+                    document.getElementById('{{posts.id}}').innerHTML = '{{posts.like_count}}'.split(',').length;
+                </script>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    {% endfor %}
+    
+</body>
+{% endblock %}
